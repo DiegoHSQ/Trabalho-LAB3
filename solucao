@@ -1,0 +1,87 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+class Cidade {
+    String id;
+    double x, y;
+
+    public Cidade(String id, double x, double y) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+    }
+
+    public double distanciaPara(Cidade outra) {
+        return Math.sqrt(Math.pow(this.x - outra.x, 2) + Math.pow(this.y - outra.y, 2));
+    }
+
+    public String toString() {
+        return String.format("Cidade '%s', x=%.0f, y=%.0f", id, x, y);
+    }
+}
+
+public class CaixeiroViajante {
+
+    private final List<Cidade> cidades = new ArrayList<>();
+    private List<Cidade> melhorRota;
+    private double menorDistancia = Double.MAX_VALUE;
+
+    public CaixeiroViajante() {
+        cidades.add(new Cidade("1", 0, 0));
+        cidades.add(new Cidade("2", 43, 12));
+        cidades.add(new Cidade("3", -123, 54));
+        cidades.add(new Cidade("4", 456, 23));
+        cidades.add(new Cidade("5", 122, 46));
+        cidades.add(new Cidade("6", 90, 78));
+        cidades.add(new Cidade("7", 456, 78));
+        cidades.add(new Cidade("8", 234, 92));
+        cidades.add(new Cidade("9", 12, 23));
+        cidades.add(new Cidade("10", 59, 24));
+    }
+
+    public void calcularMelhorRota() {
+        permutar(cidades, 0);
+    }
+
+    private void permutar(List<Cidade> lista, int inicio) {
+        if (inicio == lista.size() - 1) {
+            double distanciaAtual = calcularDistancia(lista);
+            if (distanciaAtual < menorDistancia) {
+                menorDistancia = distanciaAtual;
+                melhorRota = new ArrayList<>(lista);
+            }
+            return;
+        }
+        for (int i = inicio; i < lista.size(); i++) {
+            Collections.swap(lista, inicio, i);
+            permutar(lista, inicio + 1);
+            Collections.swap(lista, inicio, i);
+        }
+    }
+
+    private double calcularDistancia(List<Cidade> rota) {
+        double total = 0;
+        for (int i = 0; i < rota.size(); i++) {
+            total += rota.get(i).distanciaPara(rota.get((i + 1) % rota.size()));
+        }
+        return total;
+    }
+
+    public void exibirMelhorRota() {
+        System.out.println("Melhor rota encontrada:");
+        for (int i = 0; i < melhorRota.size(); i++) {
+            Cidade atual = melhorRota.get(i);
+            Cidade proxima = melhorRota.get((i + 1) % melhorRota.size());
+            System.out.printf("%s -> %s / Distância: %.2f km\n",
+                    atual, proxima, atual.distanciaPara(proxima));
+        }
+        System.out.printf("Distância total: %.2f km\n", menorDistancia);
+    }
+
+    public static void main(String[] args) {
+        CaixeiroViajante caixeiro = new CaixeiroViajante();
+        caixeiro.calcularMelhorRota();
+        caixeiro.exibirMelhorRota();
+    }
+}
