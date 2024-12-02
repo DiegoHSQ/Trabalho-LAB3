@@ -2,32 +2,42 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// Classe representando uma cidade com um identificador, coordenadas x e y
 class Cidade {
-    String id;
-    double x, y;
+    String id; // Identificador da cidade
+    double x, y; // Coordenadas x e y da cidade
 
+    // Construtor para inicializar a cidade com seu identificador e coordenadas
     public Cidade(String id, double x, double y) {
         this.id = id;
         this.x = x;
         this.y = y;
     }
 
+    // Calcula a distância euclidiana entre esta cidade e outra cidade
     public double distanciaPara(Cidade outra) {
         return Math.sqrt(Math.pow(this.x - outra.x, 2) + Math.pow(this.y - outra.y, 2));
     }
 
+    // Retorna uma representação textual da cidade
     public String toString() {
         return String.format("Cidade '%s', x=%.0f, y=%.0f", id, x, y);
     }
 }
 
+// Classe principal para resolver o problema do caixeiro viajante
 public class CaixeiroViajante {
 
+    // Lista de cidades a serem visitadas
     private final List<Cidade> cidades = new ArrayList<>();
+
+    // Variáveis para armazenar a melhor rota e a menor distância encontrada
     private List<Cidade> melhorRota;
     private double menorDistancia = Double.MAX_VALUE;
 
+    // Construtor que inicializa a lista de cidades com valores fixos
     public CaixeiroViajante() {
+        // Adiciona cidades com identificadores e coordenadas
         cidades.add(new Cidade("1", 0, 0));
         cidades.add(new Cidade("2", 43, 12));
         cidades.add(new Cidade("3", -123, 54));
@@ -40,46 +50,59 @@ public class CaixeiroViajante {
         cidades.add(new Cidade("10", 59, 24));
     }
 
+    // Método principal para calcular a melhor rota
     public void calcularMelhorRota() {
+        // Gera todas as permutações possíveis das cidades
         permutar(cidades, 0);
     }
 
+    // Gera todas as permutações de uma lista de cidades a partir de um índice inicial
     private void permutar(List<Cidade> lista, int inicio) {
+        // Caso base: se a permutação estiver completa, calcula a distância total
         if (inicio == lista.size() - 1) {
             double distanciaAtual = calcularDistancia(lista);
+            // Atualiza a melhor rota se a distância atual for menor
             if (distanciaAtual < menorDistancia) {
                 menorDistancia = distanciaAtual;
                 melhorRota = new ArrayList<>(lista);
             }
             return;
         }
+        // Permuta elementos da lista recursivamente
         for (int i = inicio; i < lista.size(); i++) {
-            Collections.swap(lista, inicio, i);
-            permutar(lista, inicio + 1);
-            Collections.swap(lista, inicio, i);
+            Collections.swap(lista, inicio, i); // Troca elementos
+            permutar(lista, inicio + 1); // Continua permutando
+            Collections.swap(lista, inicio, i); // Desfaz a troca
         }
     }
 
+    // Calcula a distância total de uma rota (circuito fechado)
     private double calcularDistancia(List<Cidade> rota) {
         double total = 0;
+        // Soma as distâncias entre cidades consecutivas, incluindo o retorno à inicial
         for (int i = 0; i < rota.size(); i++) {
             total += rota.get(i).distanciaPara(rota.get((i + 1) % rota.size()));
         }
         return total;
     }
 
+    // Exibe a melhor rota encontrada e suas distâncias
     public void exibirMelhorRota() {
         System.out.println("Melhor rota encontrada:");
         for (int i = 0; i < melhorRota.size(); i++) {
             Cidade atual = melhorRota.get(i);
             Cidade proxima = melhorRota.get((i + 1) % melhorRota.size());
+            // Exibe cada cidade e a distância para a próxima cidade
             System.out.printf("%s -> %s / Distância: %.2f km\n",
                     atual, proxima, atual.distanciaPara(proxima));
         }
+        // Exibe a distância total da melhor rota
         System.out.printf("Distância total: %.2f km\n", menorDistancia);
     }
 
+    // Método principal para executar o programa
     public static void main(String[] args) {
+        // Cria uma instância da classe e calcula/exibe a melhor rota
         CaixeiroViajante caixeiro = new CaixeiroViajante();
         caixeiro.calcularMelhorRota();
         caixeiro.exibirMelhorRota();
